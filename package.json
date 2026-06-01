@@ -1,0 +1,17 @@
+{
+  "name": "nexlog-mercadao-mvp",
+  "version": "1.0.0",
+  "description": "MVP do caso de uso UC03 - Realizar Pedido",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
