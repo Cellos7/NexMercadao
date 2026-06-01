@@ -1,109 +1,243 @@
-# NexLog Mercadao - MVP UC03
+# Definição do Projeto — NexLog Mercadão
 
-MVP academico focado no caso de uso **UC03 - Realizar Pedido**.
+## 1. Visão Geral
+O NexLog Mercadão é uma plataforma marketplace para o setor FMCG 
+(Bens de Consumo de Movimento Rápido). Faz a conexão entre fornecedores 
+e compradores, permitindo o cadastro de produtos tendo controle de 
+estoque em tempo real, faz também pagamento de pedidos e o 
+acompanhamento da entrega em tempo real.
 
-O projeto demonstra integracao entre front-end Angular e back-end via API REST, com arquitetura em camadas e regras de negocio concentradas na camada de servicos.
+## 2. Objetivo Geral
+Objetivo é a entrega de uma plataforma que facilita a mediação entre 
+fornecedor e compradores da área, fazendo a gestão de estoque, 
+pedidos, pagamento e a logística da entrega.
 
-## Escopo implementado
+## 3. Justificativa
+O setor FMCG tem uma alta rotatividade de mercadorias. Pequenos 
+varejistas tendem a ter problemas em encontrar fornecedores com 
+disponibilidade momentânea, e os fornecedores têm dificuldade de 
+medir a demanda em tempo real. O NexLog Mercadão vem com o intuito 
+de resolver esses problemas.
 
-- Listagem de produtos disponiveis na vitrine
-- Criacao de pedido pelo comprador
-- Validacao de estoque disponivel
-- Validacao de pedido com produtos de apenas um fornecedor
-- Pagamento simulado
-- Desconto de estoque no pagamento
-- Historico simples de pedidos
-- Testes automatizados do caso de uso escolhido
+## 4. Público-Alvo e Atores
+Público sendo fornecedores e compradores varejistas do setor FMCG, 
+entregadores e administradores que gerenciam a plataforma.
 
-## Decisoes de MVP
+## 5. Escopo
+O escopo será o cadastro e autenticação dos 4 usuários citados, 
+gestão de produtos, veículos e rotas, realização de pedidos e 
+pagamentos, despacho com vinculação de entregador, veículo e rota 
+e atualização de estoque e rastreamento de entrega em tempo real.
 
-- O banco foi representado por repositorios em memoria para reduzir dependencias e facilitar a demonstracao.
-- A camada de repositorio isola o armazenamento, entao pode ser substituida por Prisma/PostgreSQL sem alterar controladores e servicos.
-- Socket.IO, rastreamento, veiculos, rotas e despacho ficaram fora da implementacao porque o caso de uso escolhido e UC03.
+## 6. Tecnologias
+- Backend: Node.js, Express, Prisma
+- Banco de dados: PostgreSQL
+- Comunicação em tempo real: Socket.IO
+- Autenticação: JWT
+- Frontend: Angular
+- Mapa e geolocalização: Leaflet + OpenStreetMap
+- Containerização: Docker
+- Controle de versão: Git/GitHub
+- Gerenciamento de tarefas: Jira
 
-## Rotas REST usadas no MVP
+## 7. Premissas e Restrições
 
-```text
-GET  /api/produtos
-POST /api/pedidos
-POST /api/pedidos/:id/pagar
-GET  /api/pedidos
-```
+**Premissas:**
+- Usuários têm acesso à internet estável
+- Compradores são pessoas jurídicas (varejistas)
+- Operação restrita a uma única região no MVP
 
-## Como rodar
+**Restrições:**
+- Sistema 100% web (sem app mobile nativo)
+- Pagamento simulado (sem integração real com gateway)
+- Cálculo de frete simplificado (fórmula direta, sem cálculo de rota por ruas)
+- Posição do entregador será simulada (sem GPS real do dispositivo)
+- Cada pedido envolve um único fornecedor
+- Idioma: PT-BR
 
-1. Suba o PostgreSQL pelo Docker:
 
-```bash
-docker compose up -d
-```
 
-2. Rode o backend com a variavel do banco:
+# Requisitos e Regras de Negócio — NexLog Mercadão
 
-```bash
-set DATABASE_URL=postgres://nexlog:nexlog123@localhost:5432/nexlog_mercadao
-npm install
-npm start
-```
+## Requisitos Funcionais
 
-No PowerShell, use:
+**Autenticação**
+- RF01: Cadastro de usuário escolhendo entre fornecedor, comprador 
+  ou entregador
+- RF02: Login com e-mail e senha, retornando token JWT
 
-```powershell
-$env:DATABASE_URL="postgres://nexlog:nexlog123@localhost:5432/nexlog_mercadao"
-npm install
-npm start
-```
+**Fornecedor**
+- RF03: Cadastrar e editar produtos (nome, preço, estoque, perecível 
+  ou não)
+- RF04: Visualizar pedidos recebidos e seus status
 
-3. Em outro terminal, rode o Angular:
+**Comprador**
+- RF05: Vitrine de produtos com estoque atualizado em tempo real
+- RF06: Fazer pedido informando produtos, quantidades e endereço de 
+  entrega
+- RF07: Pagar o pedido em fluxo simulado
+- RF08: Acompanhar a entrega no mapa em tempo real
+- RF09: Consultar histórico de pedidos
 
-```bash
-cd frontend
-npm install
-npm start
-```
+**Entregador**
+- RF10: Visualizar entregas atribuídas
+- RF11: Atualizar status da entrega (em rota, entregue, falha)
 
-Acesse:
+**Administrador**
+- RF12: Cadastrar veículos (placa, modelo, capacidade, se é refrigerado)
+- RF13: Cadastrar rotas (nome e região atendida)
+- RF14: Despachar pedidos pagos vinculando entregador, veículo e rota
 
-```text
-http://localhost:4200
-```
+**Tempo real**
+- RF15: Atualizar estoque e localização do entregador via WebSocket
 
-O Docker fica responsavel apenas pelo banco PostgreSQL em `localhost:5432`.
+## Requisitos Não-Funcionais
 
-Para parar o banco:
+- RNF01: API REST entre front e back
+- RNF02: Banco PostgreSQL
+- RNF03: WebSocket via Socket.IO para tempo real
+- RNF04: Senhas com bcrypt, autenticação por JWT
+- RNF05: Interface responsiva (desktop e navegador mobile)
+- RNF06: Aplicação rodando em containers Docker
+- RNF07: Resposta abaixo de 2s em consultas comuns
+- RNF08: Arquitetura em camadas (Controller, Service, Repository)
 
-```bash
-docker compose down
-```
+## Regras de Negócio
 
-Para conferir o backend diretamente:
+- RN01: Só fornecedor cadastra produtos
+- RN02: Só administrador cadastra veículos, rotas e despacha pedidos
+- RN03: Pedido só é despachado depois do pagamento confirmado
+- RN04: Cada pedido tem produtos de apenas um fornecedor
+- RN05: Não é possível pedir mais do que o estoque disponível
+- RN06: Produto perecível só pode ir em veículo refrigerado
+- RN07: Entregador só pode ter uma entrega ativa por vez
+- RN08: Estoque é descontado no momento do pagamento
+- RN09: Pedido entregue não pode ser editado nem cancelado
+- RN10: Comprador pode cancelar pedido apenas antes do status "em rota"
 
-```text
-http://localhost:3000
-http://localhost:3000/api/produtos
-```
 
-O arquivo `frontend/proxy.conf.json` encaminha as chamadas `/api` para o backend em `http://localhost:3000`.
+# Casos de Uso — NexLog Mercadão
 
-## Como testar
+## UC01 — Autenticar Usuário
+**Atores:** Fornecedor, Comprador, Entregador, Administrador
+**Pré-condição:** usuário já cadastrado
+**Pós-condição:** usuário autenticado com token JWT válido
 
-```bash
-node --test tests/*.test.js
-```
+Fluxo principal:
+1. Usuário acessa a tela de login
+2. Informa e-mail e senha
+3. Sistema valida as credenciais
+4. Sistema emite token JWT
+5. Usuário é redirecionado para a tela inicial conforme seu papel
 
-## Arquitetura
+Fluxos alternativos:
+- 3a. Credenciais inválidas → sistema exibe erro e mantém na tela de login
 
-```text
-src/
-  domain/          Status e erros de dominio
-  repositories/    Acesso a dados em memoria
-  services/        Regras de negocio e casos de uso
-  controllers/     Entrada das requisicoes HTTP
-  http/            Servidor, roteamento e helpers REST
+RFs: RF02
+RNs: —
 
-frontend/
-  src/app/         Componentes, modelos e servico HTTP do Angular
 
-docker/
-  postgres/        Script SQL inicial do PostgreSQL
-```
+## UC02 — Cadastrar Produto
+**Ator:** Fornecedor
+**Pré-condição:** fornecedor autenticado
+**Pós-condição:** produto disponível na vitrine
+
+Fluxo principal:
+1. Fornecedor acessa "Meus produtos"
+2. Clica em "Novo produto"
+3. Preenche nome, preço, estoque e marca se é perecível
+4. Confirma o cadastro
+5. Sistema valida e salva o produto
+6. Sistema notifica a vitrine via WebSocket
+
+Fluxos alternativos:
+- 5a. Dados inválidos → sistema exibe erro e mantém o formulário
+
+RFs: RF03, RF15
+RNs: RN01
+
+
+## UC03 — Realizar Pedido
+**Ator:** Comprador
+**Pré-condição:** comprador autenticado, produtos disponíveis na vitrine
+**Pós-condição:** pedido criado e pago, aguardando despacho
+
+Fluxo principal:
+1. Comprador acessa a vitrine
+2. Seleciona produtos (de um único fornecedor) e quantidades
+3. Informa o endereço de entrega
+4. Confirma o pedido
+5. Sistema valida estoque e fornecedor único
+6. Sistema cria o pedido com status "Aguardando pagamento"
+7. Comprador efetua o pagamento (fluxo simulado)
+8. Sistema confirma o pagamento e decrementa o estoque
+9. Pedido passa para status "Aguardando despacho"
+
+Fluxos alternativos:
+- 5a. Estoque insuficiente → sistema bloqueia e avisa
+- 5b. Produtos de fornecedores diferentes → sistema bloqueia
+- 7a. Pagamento falha → pedido continua "Aguardando pagamento"
+
+RFs: RF05, RF06, RF07
+RNs: RN04, RN05, RN08
+
+
+## UC04 — Despachar Pedido
+**Ator:** Administrador
+**Pré-condição:** pedido com status "Aguardando despacho"
+**Pós-condição:** entrega criada, pedido com status "Em rota"
+
+Fluxo principal:
+1. Admin acessa lista de pedidos prontos para despacho
+2. Seleciona um pedido
+3. Escolhe entregador, veículo e rota
+4. Confirma o despacho
+5. Sistema valida regras (perecível ↔ refrigerado, entregador livre)
+6. Sistema cria a entrega e muda o pedido para "Em rota"
+7. Sistema notifica o comprador via WebSocket
+
+Fluxos alternativos:
+- 5a. Produto perecível + veículo não refrigerado → bloqueia
+- 5b. Entregador já com entrega ativa → bloqueia
+
+RFs: RF12, RF13, RF14
+RNs: RN02, RN03, RN06, RN07
+
+
+## UC05 — Rastrear Entrega em Tempo Real
+**Ator:** Comprador
+**Pré-condição:** pedido despachado (status "Em rota")
+**Pós-condição:** comprador acompanhou a entrega até o status final
+
+Fluxo principal:
+1. Comprador acessa a tela de rastreamento do pedido
+2. Sistema abre conexão WebSocket
+3. Sistema envia coordenadas atuais do entregador
+4. Mapa exibe o pin do entregador, atualizando conforme chegam coordenadas
+5. Quando o entregador conclui, sistema notifica e encerra a conexão
+
+Fluxos alternativos:
+- 5a. Entregador marca como "Falha na entrega" → comprador é notificado
+
+RFs: RF08, RF15
+RNs: —
+
+
+## UC06 — Atualizar Status da Entrega
+**Ator:** Entregador
+**Pré-condição:** entregador com entrega ativa
+**Pós-condição:** status da entrega atualizado, comprador notificado
+
+Fluxo principal:
+1. Entregador acessa "Minhas entregas"
+2. Seleciona a entrega ativa
+3. Atualiza o status (em rota → entregue ou falha)
+4. Sistema valida e persiste
+5. Sistema notifica o comprador via WebSocket
+
+Fluxos alternativos:
+- 4a. Transição de status inválida → sistema bloqueia
+
+RFs: RF10, RF11, RF15
+RNs: RN09
+
