@@ -1,0 +1,94 @@
+<main class="shell">
+  <section class="workspace">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">UC03 - Realizar Pedido</p>
+        <h1>NexLog Mercadao</h1>
+      </div>
+      <div class="buyer">
+        <span>Comprador</span>
+        <strong>Mercadinho Sao Jorge</strong>
+      </div>
+    </header>
+
+    <section class="content-grid">
+      <section class="panel">
+        <div class="panel-heading">
+          <h2>Vitrine B2B</h2>
+          <button type="button" (click)="carregarProdutos()">Atualizar</button>
+        </div>
+
+        <div class="product-list">
+          <article class="product" *ngFor="let produto of produtos">
+            <div>
+              <h3>{{ produto.nome }}</h3>
+              <p class="meta">{{ produto.nomeFornecedor }} - {{ formatarMoeda(produto.preco) }}</p>
+              <span class="tag">{{ produto.perecivel ? "Perecivel" : "Nao perecivel" }}</span>
+            </div>
+            <div class="estoque">{{ produto.estoque }} un.</div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="panel order-panel">
+        <h2>Novo pedido</h2>
+        <form (ngSubmit)="criarPedido()">
+          <label>
+            Produto
+            <select name="produtoSelecionado" [(ngModel)]="produtoSelecionado" required>
+              <option *ngFor="let produto of produtos" [value]="produto.id">
+                {{ produto.nome }} - estoque {{ produto.estoque }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Quantidade
+            <input name="quantidade" type="number" min="1" [(ngModel)]="quantidade" required>
+          </label>
+
+          <label>
+            Endereco de entrega
+            <input name="enderecoEntrega" type="text" [(ngModel)]="enderecoEntrega" required>
+          </label>
+
+          <button type="submit" [disabled]="carregando || !produtoSelecionado">Criar pedido</button>
+        </form>
+
+        <div class="current-order empty" *ngIf="!pedidoAtual">Nenhum pedido criado.</div>
+
+        <div class="current-order" *ngIf="pedidoAtual">
+          <strong>Pedido {{ pedidoAtual.id }}</strong>
+          <p class="meta">Status: {{ pedidoAtual.status }}</p>
+          <p *ngFor="let item of pedidoAtual.itens">{{ item.quantidade }}x {{ item.nomeProduto }}</p>
+          <p><strong>Total: {{ formatarMoeda(pedidoAtual.total) }}</strong></p>
+        </div>
+
+        <button type="button" (click)="pagarPedido()" [disabled]="!pedidoAtual || pedidoAtual.status === 'PAGO' || carregando">
+          Pagamento simulado
+        </button>
+
+        <p class="feedback" [class.error]="erro" aria-live="polite">{{ mensagem }}</p>
+      </aside>
+    </section>
+
+    <section class="panel history">
+      <div class="panel-heading">
+        <h2>Historico de pedidos</h2>
+        <button type="button" (click)="carregarPedidos()">Recarregar</button>
+      </div>
+
+      <p class="meta" *ngIf="pedidos.length === 0">Nenhum pedido registrado.</p>
+
+      <div class="order-row" *ngFor="let pedido of pedidos">
+        <strong>{{ pedido.id }} - {{ pedido.status }}</strong>
+        <span class="meta">
+          <ng-container *ngFor="let item of pedido.itens; let ultimo = last">
+            {{ item.quantidade }}x {{ item.nomeProduto }}<ng-container *ngIf="!ultimo">, </ng-container>
+          </ng-container>
+        </span>
+        <span>Total: {{ formatarMoeda(pedido.total) }}</span>
+      </div>
+    </section>
+  </section>
+</main>
